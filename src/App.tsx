@@ -7,6 +7,7 @@ import {
 import Button from "./components/Button";
 import KoFi from "./components/KoFi";
 import RecipeBooks from "./pages/RecipeBooks";
+import Recipes from "./pages/Recipes";
 import Settings from "./pages/Settings";
 import "./App.css";
 
@@ -33,6 +34,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/recipe-books" element={<RecipeBooks />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="recipe-books/:id" element={<Recipes />} />
       </Routes>
     </Router>
   );

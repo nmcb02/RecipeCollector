@@ -1,0 +1,106 @@
+import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+
+type RecipeBook = {
+  id: number;
+  name: string;
+  recipes: string[];
+};
+
+export default function RecipeBookDetail() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const [book, setBook] = useState<RecipeBook | null>(null);
+  const [newRecipeName, setNewRecipeName] = useState("");
+
+  // Load the book and its recipes
+  useEffect(() => {
+    const storedBooks = localStorage.getItem("recipeBooks");
+    if (!storedBooks) return;
+
+    const books: RecipeBook[] = JSON.parse(storedBooks);
+
+    const found = books.find((b) => b.id === Number(id));
+
+    // If the book exists but has no recipes field, add it
+    if (found && !found.recipes) {
+      found.recipes = [];
+    }
+
+    setBook(found || null);
+  }, [id]);
+
+  if (!book) {
+    return (
+      <>
+        <h1>Recipe Book Not Found</h1>
+        <button onClick={() => navigate("/recipe-books")}>Back</button>
+      </>
+    );
+  }
+
+  function saveBook(updatedBook: RecipeBook) {
+    const storedBooks = localStorage.getItem("recipeBooks");
+    if (!storedBooks) return;
+
+    const books: RecipeBook[] = JSON.parse(storedBooks);
+
+    const updatedBooks = books.map((b) =>
+      b.id === updatedBook.id ? updatedBook : b,
+    );
+
+    localStorage.setItem("recipeBooks", JSON.stringify(updatedBooks));
+  }
+
+  function addRecipe() {
+    if (newRecipeName.trim() === "") return;
+
+    const updatedBook = {
+      ...book,
+      recipes: [...book.recipes, newRecipeName.trim()],
+    };
+
+    setBook(updatedBook);
+    saveBook(updatedBook);
+
+    setNewRecipeName("");
+  }
+
+  function deleteRecipe(index: number) {
+    const updatedBook = {
+      ...book,
+      recipes: book.recipes.filter((_, i) => i !== index),
+    };
+
+    setBook(updatedBook);
+    saveBook(updatedBook);
+  }
+
+  return (
+    <>
+      <h1>{book.name}</h1>
+
+      <button onClick={() => navigate("/recipe-books")}>Back to Books</button>
+
+      <div>
+        <input
+          type="text"
+          value={newRecipeName}
+          onChange={(e) => setNewRecipeName(e.target.value)}
+          placeholder="New Recipe Name"
+        />
+        <button onClick={addRecipe}>Add Recipe</button>
+      </div>
+
+      <ul>
+        {book.recipes.map((recipe, index) => (
+          <li key={index}>
+            {recipe}
+            <button onClick={() => deleteRecipe(index)}>Delete</button>
+          </li>
+        ))}
+      </ul>
+    </>
+  );
+}

@@ -14,7 +14,6 @@ export default function RecipeBooks() {
 
   useEffect(() => {
     const storedBooks = localStorage.getItem("recipeBooks");
-    console.log("Loaded from storage:", storedBooks);
     if (storedBooks) {
       setRecipeBooks(JSON.parse(storedBooks));
     }
@@ -22,7 +21,6 @@ export default function RecipeBooks() {
   }, []);
 
   useEffect(() => {
-    console.log("Saving to storage:", recipeBooks);
     if (hasLoaded.current) {
       localStorage.setItem("recipeBooks", JSON.stringify(recipeBooks));
     }
@@ -61,7 +59,9 @@ export default function RecipeBooks() {
       <ul>
         {recipeBooks.map((book) => (
           <li key={book.id}>
-            {book.name}
+            <button onClick={() => navigate(`/recipe-books/${book.id}`)}>
+              {book.name}
+            </button>
             <button onClick={() => deleteRecipeBook(book.id)}>Delete</button>
           </li>
         ))}
