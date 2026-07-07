@@ -8,6 +8,7 @@ import Button from "./components/Button";
 import KoFi from "./components/KoFi";
 import RecipeBooks from "./pages/RecipeBooks";
 import Settings from "./pages/Settings";
+import "./App.css";
 
 function Home() {
   const navigate = useNavigate();
