@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import KoFi from "../components/KoFi";
 
 type RecipeBook = {
   id: number;
@@ -96,11 +97,19 @@ export default function RecipeBookDetail() {
       <ul>
         {book.recipes.map((recipe, index) => (
           <li key={index}>
-            {recipe}
+            <button
+              onClick={() =>
+                navigate(`/recipe-books/${book.id}/recipes/${index}`)
+              }
+            >
+              {recipe}
+            </button>
             <button onClick={() => deleteRecipe(index)}>Delete</button>
           </li>
         ))}
       </ul>
+
+      <KoFi />
     </>
   );
 }
