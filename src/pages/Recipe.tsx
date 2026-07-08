@@ -22,6 +22,7 @@ export default function RecipePage() {
   const [book, setBook] = useState<RecipeBook | null>(null);
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [editMode, setEditMode] = useState(false);
+  const [instructionInput, setInstructionInput] = useState("");
 
   useEffect(() => {
     const storedBooks = localStorage.getItem("recipeBooks");
@@ -72,6 +73,35 @@ export default function RecipePage() {
     });
   }
 
+  function handleInstructionInputChange(
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) {
+    setInstructionInput(e.target.value);
+  }
+
+  function saveInput(type: "ingredient" | "side_note" | "instruction") {
+    if (type === "ingredient") {
+      setRecipe({
+        ...recipe,
+        ingredients: [...recipe.ingredients, instructionInput.trim()],
+      });
+    } else if (type === "side_note") {
+      setRecipe({
+        ...recipe,
+        sideNotes: [...recipe.sideNotes, instructionInput.trim()],
+      });
+    } else if (type === "instruction") {
+      setRecipe({
+        ...recipe,
+        instructions: [...recipe.instructions, instructionInput.trim()],
+      });
+    }
+
+    setInstructionInput("");
+  }
+
+  function onDelete(type: "ingredient" | "side_note" | "instruction") {}
+
   return (
     <>
       <button onClick={() => navigate(-1)}>Back</button>
@@ -114,6 +144,17 @@ export default function RecipePage() {
               value={recipe.ingredients.join(", ")}
               onChange={(e) => updateField("ingredients", e.target.value)}
             />
+            <button onClick={() => saveInput("ingredient")}>
+              Add Ingredient
+            </button>
+            <ul>
+              {recipe.ingredients.map((i, idx) => (
+                <li key={idx}>
+                  {i}
+                  <button onClick={() => onDelete("ingredient")}>Delete</button>
+                </li>
+              ))}
+            </ul>
 
             <h2>Edit Side Notes</h2>
             <input
@@ -121,16 +162,43 @@ export default function RecipePage() {
               value={recipe.sideNotes.join(", ")}
               onChange={(e) => updateField("sideNotes", e.target.value)}
             />
+            <button onClick={() => saveInput("side_note")}>
+              Add Side Note
+            </button>
+            <ul>
+              {recipe.sideNotes.map((n, idx) => (
+                <li key={idx}>
+                  {n}
+                  <button onClick={() => onDelete("side_note")}>Delete</button>
+                </li>
+              ))}
+            </ul>
 
             <h2>Edit Instructions</h2>
             <input
               type="text"
-              value={recipe.instructions.join(", ")}
-              onChange={(e) => updateField("instructions", e.target.value)}
+              value={instructionInput}
+              onChange={handleInstructionInputChange}
+              placeholder="Add instructions"
             />
+            <button onClick={() => saveInput("instruction")}>
+              Add Instruction
+            </button>
+            <ol>
+              {recipe.instructions.map((s, idx) => (
+                <li key={idx}>
+                  {s}
+                  <button onClick={() => onDelete("instruction")}>
+                    Delete
+                  </button>
+                </li>
+              ))}
+            </ol>
 
-            <button onClick={saveChanges}>Save</button>
-            <button onClick={() => setEditMode(false)}>Cancel</button>
+            <div>
+              <button onClick={saveChanges}>Save</button>
+              <button onClick={() => setEditMode(false)}>Cancel</button>
+            </div>
           </>
         )}
       </div>
