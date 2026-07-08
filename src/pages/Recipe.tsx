@@ -2,12 +2,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import KoFi from "../components/KoFi";
 
-type RecipeBook = {
-  id: number;
-  name: string;
-  recipes: Recipe[];
-};
-
 type Recipe = {
   name: string;
   ingredients: string[];
@@ -15,127 +9,132 @@ type Recipe = {
   instructions: string[];
 };
 
-export default function Recipe() {
+type RecipeBook = {
+  id: number;
+  name: string;
+  recipes: Recipe[];
+};
+
+export default function RecipePage() {
   const { id, index } = useParams();
   const navigate = useNavigate();
 
-  const [recipeBook, setRecipeBook] = useState<RecipeBook | null>(null);
+  const [book, setBook] = useState<RecipeBook | null>(null);
   const [recipe, setRecipe] = useState<Recipe | null>(null);
-  const [editMode, setEditMode] = useState(false); // State to track if edit mode is enabled
+  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
     const storedBooks = localStorage.getItem("recipeBooks");
     if (!storedBooks) return;
 
     const books: RecipeBook[] = JSON.parse(storedBooks);
-
     const foundBook = books.find((b) => b.id === Number(id));
+
     if (!foundBook) return;
-    setRecipeBook(foundBook);
+
+    setBook(foundBook);
     setRecipe(foundBook.recipes[Number(index)]);
   }, [id, index]);
 
-  if (!recipeBook || !recipe) {
+  if (!book || !recipe) {
     return (
       <>
         <h1>Recipe Not Found</h1>
-        <button onClick={() => window.history.back()}>Back</button>
+        <button onClick={() => navigate(-1)}>Back</button>
       </>
     );
   }
 
-  function handleEdit() {
-    setEditMode(!editMode);
-  }
+  function saveChanges() {
+    if (!book || !recipe) return;
 
-  return (
-    <>
-      <button onClick={() => window.history.back()}>Back</button>
-      <div className="recipe-container">
-          <h1>{recipe.name}</h1>
-          <p>Edit functionality is not implemented yet.</p>
-        </div>
-      </>
+    const storedBooks = JSON.parse(localStorage.getItem("recipeBooks") || "[]");
+
+    const updatedBooks = storedBooks.map((b: RecipeBook) =>
+      b.id === book.id
+        ? {
+            ...b,
+            recipes: b.recipes.map((r, i) =>
+              i === Number(index) ? recipe : r,
+            ),
+          }
+        : b,
     );
+
+    localStorage.setItem("recipeBooks", JSON.stringify(updatedBooks));
+    setEditMode(false);
   }
 
-  function addIngredient() {}
-  function addSideNote() {}
-  function addInstruction() {}
+  function updateField(field: keyof Recipe, value: string) {
+    setRecipe({
+      ...recipe,
+      [field]: value.split(",").map((item) => item.trim()),
+    });
+  }
 
   return (
     <>
-      <button onClick={() => window.history.back()}>Back</button>
+      <button onClick={() => navigate(-1)}>Back</button>
+
       <div className="recipe-container">
         <h1>{recipe.name}</h1>
-        <button onClick={handleEdit}>Edit</button>
 
-        <div>
-          <h2>Ingredients</h2>
-          <input
-            type="text"
-            value={recipe.ingredients.join(", ")}
-            onChange={(e) => {
-              setRecipe({
-                ...recipe,
-                ingredients: e.target.value
-                  .split(",")
-                  .map((item) => item.trim()),
-              });
-            }}
-            placeholder="Add new ingredient"
-          />
-          <button onClick={addIngredient}>Add Ingredient</button>
+        {!editMode && (
+          <>
+            <button onClick={() => setEditMode(true)}>Edit</button>
 
-          <ul>
-            {recipe.ingredients.map((ingredient, idx) => (
-              <li key={idx}>{ingredient}</li>
-            ))}
-          </ul>
-        </div>
+            <h2>Ingredients</h2>
+            <ul>
+              {recipe.ingredients.map((i, idx) => (
+                <li key={idx}>{i}</li>
+              ))}
+            </ul>
 
-        <div>
-          <h2>Side Notes</h2>
-          <input
-            type="text"
-            value={recipe.sideNotes.join(", ")}
-            onChange={(e) => {
-              setRecipe({
-                ...recipe,
-                sideNotes: e.target.value.split(",").map((item) => item.trim()),
-              });
-            }}
-            placeholder="Add new side note"
-          />
-          <button onClick={addSideNote}>Add Side Note</button>
-          <p>{recipe.sideNotes}</p>
-        </div>
+            <h2>Side Notes</h2>
+            <ul>
+              {recipe.sideNotes.map((n, idx) => (
+                <li key={idx}>{n}</li>
+              ))}
+            </ul>
 
-        <div>
-          <h2>Instructions</h2>
-          <input
-            type="text"
-            value={recipe.instructions.join(", ")}
-            onChange={(e) => {
-              setRecipe({
-                ...recipe,
-                instructions: e.target.value
+            <h2>Instructions</h2>
+            <ol>
+              {recipe.instructions.map((s, idx) => (
+                <li key={idx}>{s}</li>
+              ))}
+            </ol>
+          </>
+        )}
 
-                  .split(",")
-                  .map((item) => item.trim()),
-              });
-            }}
-            placeholder="Add new instruction"
-          />
-          <button onClick={addInstruction}>Add Instruction</button>
+        {editMode && (
+          <>
+            <h2>Edit Ingredients</h2>
+            <input
+              type="text"
+              value={recipe.ingredients.join(", ")}
+              onChange={(e) => updateField("ingredients", e.target.value)}
+            />
 
-          <ol>
-            {recipe.instructions.map((instruction, idx) => (
-              <li key={idx}>{instruction}</li>
-            ))}
-          </ol>
-        </div>
+            <h2>Edit Side Notes</h2>
+            <input
+              type="text"
+              value={recipe.sideNotes.join(", ")}
+              onChange={(e) => updateField("sideNotes", e.target.value)}
+            />
+
+            <h2>Edit Instructions</h2>
+            <input
+              type="text"
+              value={recipe.instructions.join(", ")}
+              onChange={(e) => updateField("instructions", e.target.value)}
+            />
+
+            <button onClick={saveChanges}>Save</button>
+            <button onClick={() => setEditMode(false)}>Cancel</button>
+          </>
+        )}
       </div>
+
       <KoFi />
     </>
   );
