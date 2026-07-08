@@ -100,7 +100,27 @@ export default function RecipePage() {
     setInstructionInput("");
   }
 
-  function onDelete(type: "ingredient" | "side_note" | "instruction") {}
+  function onDelete(
+    type: "ingredient" | "side_note" | "instruction",
+    idx: number,
+  ) {
+    if (type === "ingredient") {
+      setRecipe({
+        ...recipe,
+        ingredients: recipe.ingredients.filter((_, i) => i !== idx),
+      });
+    } else if (type === "side_note") {
+      setRecipe({
+        ...recipe,
+        sideNotes: recipe.sideNotes.filter((_, i) => i !== idx),
+      });
+    } else if (type === "instruction") {
+      setRecipe({
+        ...recipe,
+        instructions: recipe.instructions.filter((_, i) => i !== idx),
+      });
+    }
+  }
 
   return (
     <>
@@ -151,7 +171,9 @@ export default function RecipePage() {
               {recipe.ingredients.map((i, idx) => (
                 <li key={idx}>
                   {i}
-                  <button onClick={() => onDelete("ingredient")}>Delete</button>
+                  <button onClick={() => onDelete("ingredient", idx)}>
+                    Delete
+                  </button>
                 </li>
               ))}
             </ul>
@@ -169,7 +191,9 @@ export default function RecipePage() {
               {recipe.sideNotes.map((n, idx) => (
                 <li key={idx}>
                   {n}
-                  <button onClick={() => onDelete("side_note")}>Delete</button>
+                  <button onClick={() => onDelete("side_note", idx)}>
+                    Delete
+                  </button>
                 </li>
               ))}
             </ul>
@@ -188,7 +212,7 @@ export default function RecipePage() {
               {recipe.instructions.map((s, idx) => (
                 <li key={idx}>
                   {s}
-                  <button onClick={() => onDelete("instruction")}>
+                  <button onClick={() => onDelete("instruction", idx)}>
                     Delete
                   </button>
                 </li>
