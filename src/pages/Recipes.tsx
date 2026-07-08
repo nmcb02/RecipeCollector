@@ -24,7 +24,6 @@ export default function RecipeBookDetail() {
 
   // Load the book and its recipes
   useEffect(() => {
-    console.log("current list:", localStorage.getItem("recipeBooks"));
     const storedBooks = localStorage.getItem("recipeBooks");
     if (!storedBooks) return;
 
