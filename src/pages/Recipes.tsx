@@ -5,7 +5,14 @@ import KoFi from "../components/KoFi";
 type RecipeBook = {
   id: number;
   name: string;
-  recipes: string[];
+  recipes: Recipe[];
+};
+
+type Recipe = {
+  name: string;
+  ingredients: string[];
+  sideNotes: string[];
+  instructions: string[];
 };
 
 export default function RecipeBookDetail() {
@@ -17,6 +24,7 @@ export default function RecipeBookDetail() {
 
   // Load the book and its recipes
   useEffect(() => {
+    console.log("current list:", localStorage.getItem("recipeBooks"));
     const storedBooks = localStorage.getItem("recipeBooks");
     if (!storedBooks) return;
 
@@ -57,14 +65,20 @@ export default function RecipeBookDetail() {
   function addRecipe() {
     if (newRecipeName.trim() === "") return;
 
+    const newRecipe: Recipe = {
+      name: newRecipeName.trim(),
+      ingredients: [],
+      sideNotes: [],
+      instructions: [],
+    };
+
     const updatedBook = {
       ...book,
-      recipes: [...book.recipes, newRecipeName.trim()],
+      recipes: [...book.recipes, newRecipe],
     };
 
     setBook(updatedBook);
     saveBook(updatedBook);
-
     setNewRecipeName("");
   }
 
@@ -102,7 +116,7 @@ export default function RecipeBookDetail() {
                 navigate(`/recipe-books/${book.id}/recipes/${index}`)
               }
             >
-              {recipe}
+              {recipe.name}
             </button>
             <button onClick={() => deleteRecipe(index)}>Delete</button>
           </li>
