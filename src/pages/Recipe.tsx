@@ -1,7 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import KoFi from "../components/KoFi";
-import RecipeBook from "../components/RecipeBook";
 
 type RecipeBook = {
   id: number;
@@ -18,11 +17,11 @@ type Recipe = {
 
 export default function Recipe() {
   const { id, index } = useParams();
+  const navigate = useNavigate();
 
-  const [RecipeBook, setRecipeBook] = useState<RecipeBook | null>(null);
-  const [Recipe, setRecipe] = useState<Recipe | null>(null);
-
-  var editEnabled = false; // Placeholder for edit functionality
+  const [recipeBook, setRecipeBook] = useState<RecipeBook | null>(null);
+  const [recipe, setRecipe] = useState<Recipe | null>(null);
+  const [editMode, setEditMode] = useState(false); // State to track if edit mode is enabled
 
   useEffect(() => {
     const storedBooks = localStorage.getItem("recipeBooks");
@@ -36,7 +35,7 @@ export default function Recipe() {
     setRecipe(foundBook.recipes[Number(index)]);
   }, [id, index]);
 
-  if (!RecipeBook || !Recipe) {
+  if (!recipeBook || !recipe) {
     return (
       <>
         <h1>Recipe Not Found</h1>
@@ -46,13 +45,14 @@ export default function Recipe() {
   }
 
   function handleEdit() {
-    editEnabled = !editEnabled;
-    return (
-      <>
-        <h1>Edit Recipe</h1>
-        <button onClick={() => window.history.back()}>Back</button>
-        <div className="recipe-container">
-          <h1>{Recipe.name}</h1>
+    setEditMode(!editMode);
+  }
+
+  return (
+    <>
+      <button onClick={() => window.history.back()}>Back</button>
+      <div className="recipe-container">
+          <h1>{recipe.name}</h1>
           <p>Edit functionality is not implemented yet.</p>
         </div>
       </>
@@ -67,17 +67,17 @@ export default function Recipe() {
     <>
       <button onClick={() => window.history.back()}>Back</button>
       <div className="recipe-container">
-        <h1>{Recipe.name}</h1>
+        <h1>{recipe.name}</h1>
         <button onClick={handleEdit}>Edit</button>
 
         <div>
           <h2>Ingredients</h2>
           <input
             type="text"
-            value={Recipe.ingredients.join(", ")}
+            value={recipe.ingredients.join(", ")}
             onChange={(e) => {
               setRecipe({
-                ...Recipe,
+                ...recipe,
                 ingredients: e.target.value
                   .split(",")
                   .map((item) => item.trim()),
@@ -88,7 +88,7 @@ export default function Recipe() {
           <button onClick={addIngredient}>Add Ingredient</button>
 
           <ul>
-            {Recipe.ingredients.map((ingredient, idx) => (
+            {recipe.ingredients.map((ingredient, idx) => (
               <li key={idx}>{ingredient}</li>
             ))}
           </ul>
@@ -98,27 +98,27 @@ export default function Recipe() {
           <h2>Side Notes</h2>
           <input
             type="text"
-            value={Recipe.sideNotes.join(", ")}
+            value={recipe.sideNotes.join(", ")}
             onChange={(e) => {
               setRecipe({
-                ...Recipe,
+                ...recipe,
                 sideNotes: e.target.value.split(",").map((item) => item.trim()),
               });
             }}
             placeholder="Add new side note"
           />
           <button onClick={addSideNote}>Add Side Note</button>
-          <p>{Recipe.sideNotes}</p>
+          <p>{recipe.sideNotes}</p>
         </div>
 
         <div>
           <h2>Instructions</h2>
           <input
             type="text"
-            value={Recipe.instructions.join(", ")}
+            value={recipe.instructions.join(", ")}
             onChange={(e) => {
               setRecipe({
-                ...Recipe,
+                ...recipe,
                 instructions: e.target.value
 
                   .split(",")
@@ -130,7 +130,7 @@ export default function Recipe() {
           <button onClick={addInstruction}>Add Instruction</button>
 
           <ol>
-            {Recipe.instructions.map((instruction, idx) => (
+            {recipe.instructions.map((instruction, idx) => (
               <li key={idx}>{instruction}</li>
             ))}
           </ol>
